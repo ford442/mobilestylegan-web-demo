@@ -51,13 +51,20 @@ async function generate(model: Model, ctx: CanvasRenderingContext2D) {
     // Create both the latent and style tensors
     const latentTensor = getRandomZ([1, model.latent]);
     const styleTensor = getStyleInput();
+    // Set the truncation value. 0.7 is a good default.
+    const truncationValue = 0.7;
+    // Use the shape and type you found in Netron (e.g., [1] and 'float32')
+    const varTensor = new Tensor('float32', [truncationValue], [1]);
+    
+    // --- NEW CODE ENDS HERE ---
 
-    // Create a 'feeds' object with names matching your model's inputs
+
+    // 2. Create the 'feeds' object with ALL THREE named inputs
     const feeds = {
       'latent': latentTensor,
-      'style': styleTensor
+      'style': styleTensor,
+      'var': varTensor // Add the new tensor here
     };
-
     // Pass the entire feeds object to the run method
     const res = await model.run(feeds); 
     
