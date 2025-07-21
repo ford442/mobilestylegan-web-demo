@@ -6,7 +6,7 @@ let synth: InferenceSession | undefined
 
 export interface Model {
   load: () => Promise<void>
-  run: (z: Tensor) => Promise<Tensor>
+  run: (feeds: { [name: string]: Tensor }) => Promise<any>;
   latent: number
 }
 
