@@ -7,6 +7,14 @@ const gauss = gaussian(0, 1)
 
 const SIZE = 1024
 
+const getStyleInput = () => {
+  // IMPORTANT: Replace with the correct shape from Netron (e.g., [1, 512])
+  const styleShape = [1, 512]; 
+  const styleSize = styleShape.reduce((a, b) => a * b, 1);
+  const styleData = new Float32Array(styleSize); // Creates a tensor of zeros
+  return new Tensor('float32', styleData, styleShape);
+};
+
 async function render(ctx: CanvasRenderingContext2D, res: any) {
   if (!ctx) {
     throw new Error('Could not get context')
@@ -34,17 +42,28 @@ const getRandomZ = (dims = [1, 128]) => {
 }
 
 async function generate(model: Model, ctx: CanvasRenderingContext2D) {
-  document.body.classList.remove('loaded')
-  const loader = document.querySelector('.loader')
+  document.body.classList.remove('loaded');
+  const loader = document.querySelector('.loader');
   if (loader) {
-    loader.innerHTML = 'Rendering...'
+    loader.innerHTML = 'Rendering...';
   }
   setTimeout(async () => {
-    const z = getRandomZ([1, model.latent])
-    const res = await model.run(z)
-    await render(ctx, res)
-    document.body.classList.add('loaded')
-  }, 10)
+    // Create both the latent and style tensors
+    const latentTensor = getRandomZ([1, model.latent]);
+    const styleTensor = getStyleInput();
+
+    // Create a 'feeds' object with names matching your model's inputs
+    const feeds = {
+      'latent': latentTensor,
+      'style': styleTensor
+    };
+
+    // Pass the entire feeds object to the run method
+    const res = await model.run(feeds); 
+    
+    await render(ctx, res);
+    document.body.classList.add('loaded');
+  }, 10);
 }
 
 async function main() {
