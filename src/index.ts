@@ -61,7 +61,7 @@ async function generate(model: Model, ctx: CanvasRenderingContext2D) {
 
     // 2. Create the 'feeds' object with ALL THREE named inputs
     const feeds = {
-      'latent': latentTensor,
+      'z': latentTensor,
       'style': styleTensor,
       'var': varTensor // Add the new tensor here
     };
