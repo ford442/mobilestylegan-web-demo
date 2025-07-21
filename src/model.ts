@@ -27,7 +27,7 @@ async function load() {
  * @param z A latent vector.
  * @returns {NdArray} The raw image data.
  */
-async function run(z: Tensor) {
+  async function run(z: { [name: string]: Tensor }) { // << FIX: Accepts a 'feeds' object
   if (!map || !synth) {
     throw new Error('model is not loaded')
   }
