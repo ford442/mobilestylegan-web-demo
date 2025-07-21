@@ -1,45 +1,36 @@
-import { InferenceSession, Tensor } from 'onnxruntime-web'
-const ndarray = require('ndarray')
+// model.ts
 
-let map: InferenceSession | undefined
-let synth: InferenceSession | undefined
+import { InferenceSession, Tensor } from 'onnxruntime-web';
 
+// This is the type definition or "contract" for your model
 export interface Model {
-  load: () => Promise<void>
-  run: (z: { [name: string]: Tensor }) => Promise<any>;
-  latent: number
+  latent: number;
+  run: (feeds: { [name: string]: Tensor }) => Promise<any>;
+  load: () => Promise<void>;
+  session?: InferenceSession;
 }
 
-/**
- * Load the FFHQ StyleGAN model.
- */
-async function load() {
-  map = await InferenceSession.create('./mobilestylegan_ffhq_v2-map.onnx', {
-    executionProviders: ['wasm'],
-  })
-  synth = await InferenceSession.create('./mobilestylegan_ffhq_v2-synth.onnx', {
-    executionProviders: ['wasm'],
-  })
-}
+// This is the class that implements the contract
+class ModelImpl implements Model {
+  latent = 512;
+  session?: InferenceSession;
 
-/**
- * Generates a face based on the latent vector.
- * @param z A latent vector.
- * @returns {NdArray} The raw image data.
- */
-  async function run(z: { [name: string]: Tensor }) { // << FIX: Accepts a 'feeds' object
-  if (!map || !synth) {
-    throw new Error('model is not loaded')
+  async load() {
+    this.session = await InferenceSession.create('./model.onnx');
   }
-  const { style } = await map.run({ var: z })
-  const results = await synth.run({ style })
-  const res = ndarray(results.img.data, results.img.dims)
-  return res
+
+  // --- ENSURE THIS METHOD BODY IS CORRECT ---
+  async run(feeds: { [name: string]: Tensor }) {
+    if (!this.session) {
+      throw new Error("Session not loaded. Call load() first.");
+    }
+
+    // The body should ONLY pass the 'feeds' object directly to the session.
+    // Any other logic here that treats 'feeds' as a Tensor will cause an error.
+    return this.session.run(feeds);
+  }
 }
 
-const model: Model = {
-  load,
-  run,
-  latent: 512,
-}
-export default model
+const model: Model = new ModelImpl();
+
+export default model;
