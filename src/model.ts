@@ -16,7 +16,7 @@ class ModelImpl implements Model {
   session?: InferenceSession;
 
   async load() {
-    this.session = await InferenceSession.create('./model.onnx');
+    this.session = await InferenceSession.create('./mobilestylegan_ffhq_v2-map.onnx');
   }
 
   // --- ENSURE THIS METHOD BODY IS CORRECT ---
